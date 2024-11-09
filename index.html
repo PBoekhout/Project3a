@@ -1,0 +1,99 @@
+<!-- templates/index.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stock Data Visualizer</title>
+
+</head>
+<body>
+    <h1>Stock Data Visualizer</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="error">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <form method="post">
+        <div class="form-group">
+            <label for="symbol">Select Stock Symbol:</label>
+            <select name="symbol" id="symbol">
+                {% for sym in stock_symbols %}
+                    <option value="{{ sym }}" {% if sym == symbol %}selected{% endif %}>{{ sym }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Chart Type:</label><br>
+            <input type="radio" name="chart_type" value="1" checked> Bar<br>
+            <input type="radio" name="chart_type" value="2"> Line<br>
+        </div>
+
+        <div class="form-group">
+            <label>Time Series Option:</label><br>
+            <input type="radio" name="time_option" value="1" checked> Intraday<br>
+            <input type="radio" name="time_option" value="2"> Daily<br>
+            <input type="radio" name="time_option" value="3"> Weekly<br>
+            <input type="radio" name="time_option" value="4"> Monthly<br>
+        </div>
+
+        <div class="form-group" id="intraday_options">
+            <label for="interval">Interval:</label>
+            <select name="interval" id="interval">
+                <option value="1">1 min</option>
+                <option value="5">5 min</option>
+                <option value="15">15 min</option>
+                <option value="30">30 min</option>
+                <option value="60">60 min</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="date_options" style="display: none;">
+            <label for="start_date">Start Date:</label>
+            <input type="date" name="start_date" id="start_date"><br><br>
+            <label for="end_date">End Date:</label>
+            <input type="date" name="end_date" id="end_date">
+        </div>
+
+        <input type="submit" value="Generate Chart">
+    </form>
+
+    {% if chart_svg %}
+        <div class="chart-container">
+            <h2>Chart for {{ symbol }}</h2>
+            <embed type="image/svg+xml" src="{{ chart_svg }}" />
+        </div>
+    {% endif %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const timeOptions = document.getElementsByName('time_option');
+            const intradayOptions = document.getElementById('intraday_options');
+            const dateOptions = document.getElementById('date_options');
+
+            function toggleOptions() {
+                const selectedOption = document.querySelector('input[name="time_option"]:checked').value;
+                if (selectedOption === '1') {
+                    intradayOptions.style.display = 'block';
+                    dateOptions.style.display = 'none';
+                } else {
+                    intradayOptions.style.display = 'none';
+                    dateOptions.style.display = 'block';
+                }
+            }
+
+            timeOptions.forEach(option => {
+                option.addEventListener('change', toggleOptions);
+            });
+
+            toggleOptions(); 
+        });
+    </script>
+</body>
+</html>
